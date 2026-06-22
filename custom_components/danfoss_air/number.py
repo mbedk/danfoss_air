@@ -60,10 +60,13 @@ class DanfossAirFanStep(NumberEntity):
             return
         _LOGGER.debug("Setting fan step to %s", step)
         self._data.update_state(command, ReadCommand.fan_step)
+        self._attr_native_value = step
 
     def update(self) -> None:
         """Fetch the current fan step from the Danfoss Air unit."""
         self._data.update()
-        self._attr_native_value = self._data.get_value(ReadCommand.fan_step)
-        if self._attr_native_value is None:
+        raw = self._data.get_value(ReadCommand.fan_step)
+        if raw is None:
             _LOGGER.debug("Could not get fan step data")
+        else:
+            self._attr_native_value = raw / 10
