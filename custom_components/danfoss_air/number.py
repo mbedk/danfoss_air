@@ -59,7 +59,7 @@ class DanfossAirFanStep(NumberEntity):
             _LOGGER.error("Invalid fan step value: %s", step)
             return
         _LOGGER.debug("Setting fan step to %s", step)
-        self._data.update_state(command, ReadCommand.fan_step)
+        self._data.send_command(command)
         self._attr_native_value = step
 
     def update(self) -> None:

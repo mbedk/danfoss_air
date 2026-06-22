@@ -50,6 +50,10 @@ class DanfossAir:
         """Get value for sensor."""
         return self._data.get(item)
 
+    def send_command(self, command):
+        """Send a command without storing the result."""
+        self._client.command(command)
+
     def update_state(self, command, state_command):
         """Send update command to Danfoss Air CCM."""
         self._data[state_command] = self._client.command(command)
