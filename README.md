@@ -30,21 +30,34 @@ A Home Assistant integration for the Danfoss Air HRV (Heat Recovery Ventilation)
 
 ## Installation
 
+### Via HACS (recommended)
+
+1. In HACS, go to **Integrations** → **⋮** → **Custom repositories**.
+2. Add `https://github.com/mbedk/danfoss_air` with category **Integration**.
+3. Search for **Danfoss Air** and click **Download**.
+4. Add the following to your `configuration.yaml`:
+   ```yaml
+   danfoss_air:
+     host: <IP address of your Danfoss Air CCM unit>
+   ```
+5. Restart Home Assistant.
+
+### Manual
+
 1. Copy the `danfoss_air` folder into your Home Assistant `custom_components` directory:
    ```
    config/custom_components/danfoss_air/
    ```
-
 2. Add the following to your `configuration.yaml`:
    ```yaml
    danfoss_air:
      host: <IP address of your Danfoss Air CCM unit>
    ```
-
 3. Restart Home Assistant.
 
 ## Notes
 
 - The integration polls the CCM unit every 60 seconds.
-- The `number.danfoss_air_fan_step` entity (slider 1–10) controls the fan speed and stays in sync with the device — if the step is changed from the physical dial or another source, Home Assistant will self-correct on the next poll.
+- The `number.danfoss_air_fan_step` slider (1–10) updates immediately in the UI when moved. The device value is reported as a percentage (0–100) internally; the integration divides by 10 to map it to the 1–10 step scale.
+- If the fan step is changed from the physical dial or another source, Home Assistant will self-correct on the next 60-second poll.
 - This integration is based on the upstream [Home Assistant core integration](https://github.com/home-assistant/core/tree/dev/homeassistant/components/danfoss_air), extended with fan step control.
