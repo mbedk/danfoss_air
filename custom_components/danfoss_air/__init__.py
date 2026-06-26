@@ -5,45 +5,44 @@ import logging
 
 from pydanfossair.commands import ReadCommand
 from pydanfossair.danfossclient import DanfossClient
-import voluptuous as vol
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import config_validation as cv, discovery
-from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import Throttle
+
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.NUMBER, Platform.SENSOR, Platform.SWITCH]
-DOMAIN = "danfoss_air"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=60)
 
-CONFIG_SCHEMA = vol.Schema(
-    {DOMAIN: vol.Schema({vol.Required(CONF_HOST): cv.string})}, extra=vol.ALLOW_EXTRA
-)
 
-
-def setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up the Danfoss Air component."""
-    conf = config[DOMAIN]
-
-    hass.data[DOMAIN] = DanfossAir(conf[CONF_HOST])
-
-    for platform in PLATFORMS:
-        discovery.load_platform(hass, platform, DOMAIN, {}, config)
-
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Danfoss Air from a config entry."""
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = DanfossAir(entry.data[CONF_HOST])
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id)
+    return unload_ok
 
 
 class DanfossAir:
     """Handle all communication with Danfoss Air CCM unit."""
 
-    def __init__(self, host):
+    def __init__(self, host: str) -> None:
         """Initialize the Danfoss Air CCM connection."""
+        self.host = host
         self._data = {}
-
         self._client = DanfossClient(host)
 
     def get_value(self, item):

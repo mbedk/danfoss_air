@@ -26,7 +26,7 @@ A Home Assistant integration for the Danfoss Air HRV (Heat Recovery Ventilation)
 ## Requirements
 
 - [`pydanfossair`](https://github.com/JonasPed/pydanfoss-air) >= 0.3.0
-- Home Assistant (YAML configuration, legacy setup)
+- Home Assistant (UI configuration via config flow)
 
 ## Installation
 
@@ -35,12 +35,8 @@ A Home Assistant integration for the Danfoss Air HRV (Heat Recovery Ventilation)
 1. In HACS, go to **Integrations** → **⋮** → **Custom repositories**.
 2. Add `https://github.com/mbedk/danfoss_air` with category **Integration**.
 3. Search for **Danfoss Air** and click **Download**.
-4. Add the following to your `configuration.yaml`:
-   ```yaml
-   danfoss_air:
-     host: <IP address of your Danfoss Air CCM unit>
-   ```
-5. Restart Home Assistant.
+4. Restart Home Assistant.
+5. Go to **Settings** → **Devices & Services** → **Add Integration**, search for **Danfoss Air**, and enter the IP address of your CCM unit.
 
 ### Manual
 
@@ -48,12 +44,8 @@ A Home Assistant integration for the Danfoss Air HRV (Heat Recovery Ventilation)
    ```
    config/custom_components/danfoss_air/
    ```
-2. Add the following to your `configuration.yaml`:
-   ```yaml
-   danfoss_air:
-     host: <IP address of your Danfoss Air CCM unit>
-   ```
-3. Restart Home Assistant.
+2. Restart Home Assistant.
+3. Go to **Settings** → **Devices & Services** → **Add Integration**, search for **Danfoss Air**, and enter the IP address of your CCM unit.
 
 ## Notes
 

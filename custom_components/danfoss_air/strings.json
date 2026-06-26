@@ -1,0 +1,19 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Danfoss Air",
+        "description": "Enter the IP address or hostname of your Danfoss Air CCM unit.",
+        "data": {
+          "host": "Host"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Unable to connect to the Danfoss Air CCM unit. Check the IP address and that the unit is reachable."
+    },
+    "abort": {
+      "already_configured": "This Danfoss Air unit is already configured."
+    }
+  }
+}

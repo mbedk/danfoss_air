@@ -1,11 +1,11 @@
 {
   "domain": "danfoss_air",
   "name": "Danfoss Air",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "codeowners": [],
-  "documentation": "https://www.home-assistant.io/integrations/danfoss_air",
+  "config_flow": true,
+  "documentation": "https://github.com/mbedk/danfoss_air",
   "iot_class": "local_polling",
   "loggers": ["pydanfossair"],
-  "quality_scale": "legacy",
   "requirements": ["pydanfossair==0.3.0"]
 }

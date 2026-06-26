@@ -5,11 +5,12 @@ import logging
 from pydanfossair.commands import ReadCommand, UpdateCommand
 
 from homeassistant.components.number import NumberEntity, NumberMode
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-from . import DOMAIN
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,21 +28,21 @@ _FAN_STEP_COMMANDS = {
 }
 
 
-def setup_platform(
+async def async_setup_entry(
     hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
+    entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the Danfoss Air number platform."""
-    data = hass.data[DOMAIN]
-    add_entities([DanfossAirFanStep(data)], True)
+    """Set up Danfoss Air number entities from a config entry."""
+    data = hass.data[DOMAIN][entry.entry_id]
+    async_add_entities([DanfossAirFanStep(data)])
 
 
 class DanfossAirFanStep(NumberEntity):
     """Representation of the Danfoss Air fan step control."""
 
-    _attr_name = "Danfoss Air Fan Step"
+    _attr_has_entity_name = True
+    _attr_name = "Fan Step"
     _attr_native_min_value = 1
     _attr_native_max_value = 10
     _attr_native_step = 1
@@ -50,6 +51,13 @@ class DanfossAirFanStep(NumberEntity):
     def __init__(self, data) -> None:
         """Initialize the fan step number entity."""
         self._data = data
+        self._attr_unique_id = f"{data.host}_fan_step"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, data.host)},
+            name="Danfoss Air",
+            manufacturer="Danfoss",
+            model="Air CCM",
+        )
 
     def set_native_value(self, value: float) -> None:
         """Set the fan step on the Danfoss Air unit."""
