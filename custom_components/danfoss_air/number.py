@@ -41,7 +41,7 @@ async def async_setup_entry(
 class DanfossAirFanStep(DanfossAirEntity, NumberEntity):
     """Representation of the Danfoss Air fan step control."""
 
-    _attr_name = "Fan Step"
+    _attr_translation_key = "fan_step"
     _attr_native_min_value = 1
     _attr_native_max_value = 10
     _attr_native_step = 1

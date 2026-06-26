@@ -18,19 +18,19 @@ PARALLEL_UPDATES = 1
 
 _SWITCHES = [
     (
-        "Boost",
+        "boost",
         ReadCommand.boost,
         UpdateCommand.boost_activate,
         UpdateCommand.boost_deactivate,
     ),
     (
-        "Bypass",
+        "bypass",
         ReadCommand.bypass,
         UpdateCommand.bypass_activate,
         UpdateCommand.bypass_deactivate,
     ),
     (
-        "Automatic Bypass",
+        "automatic_bypass",
         ReadCommand.automatic_bypass,
         UpdateCommand.bypass_activate,
         UpdateCommand.bypass_deactivate,
@@ -45,21 +45,21 @@ async def async_setup_entry(
 ) -> None:
     """Set up Danfoss Air switches."""
     async_add_entities(
-        DanfossAirSwitch(entry.runtime_data, name, state_cmd, on_cmd, off_cmd)
-        for name, state_cmd, on_cmd, off_cmd in _SWITCHES
+        DanfossAirSwitch(entry.runtime_data, translation_key, state_cmd, on_cmd, off_cmd)
+        for translation_key, state_cmd, on_cmd, off_cmd in _SWITCHES
     )
 
 
 class DanfossAirSwitch(DanfossAirEntity, SwitchEntity):
     """Representation of a Danfoss Air switch."""
 
-    def __init__(self, coordinator, name, state_command, on_command, off_command):
+    def __init__(self, coordinator, translation_key, state_command, on_command, off_command):
         """Initialize the switch."""
         super().__init__(coordinator)
         self._state_command = state_command
         self._on_command = on_command
         self._off_command = off_command
-        self._attr_name = name
+        self._attr_translation_key = translation_key
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{state_command.name}"
 
     @property
@@ -69,7 +69,7 @@ class DanfossAirSwitch(DanfossAirEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
-        _LOGGER.debug("Turning on %s", self._attr_name)
+        _LOGGER.debug("Turning on %s", self._attr_translation_key)
         result = await self.coordinator.async_send_command(self._on_command)
         self.coordinator.async_set_updated_data(
             {**self.coordinator.data, self._state_command: result}
@@ -77,7 +77,7 @@ class DanfossAirSwitch(DanfossAirEntity, SwitchEntity):
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the switch off."""
-        _LOGGER.debug("Turning off %s", self._attr_name)
+        _LOGGER.debug("Turning off %s", self._attr_translation_key)
         result = await self.coordinator.async_send_command(self._off_command)
         self.coordinator.async_set_updated_data(
             {**self.coordinator.data, self._state_command: result}

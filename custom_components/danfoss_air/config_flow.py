@@ -40,6 +40,32 @@ class DanfossAirConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
+    async def async_step_reconfigure(self, user_input=None):
+        """Handle reconfiguration."""
+        errors = {}
+        reconfigure_entry = self._get_reconfigure_entry()
+
+        if user_input is not None:
+            host = user_input[CONF_HOST]
+            try:
+                await self.hass.async_add_executor_job(self._test_connection, host)
+            except Exception:
+                _LOGGER.exception("Failed to connect to Danfoss Air CCM at %s", host)
+                errors["base"] = "cannot_connect"
+            else:
+                return self.async_update_reload_and_abort(
+                    reconfigure_entry,
+                    data_updates={CONF_HOST: host},
+                )
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {vol.Required(CONF_HOST, default=reconfigure_entry.data[CONF_HOST]): str}
+            ),
+            errors=errors,
+        )
+
     @staticmethod
     def _test_connection(host: str) -> None:
         """Test that the CCM unit is reachable by reading one value."""

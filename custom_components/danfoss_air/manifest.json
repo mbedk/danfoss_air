@@ -2,9 +2,10 @@
   "domain": "danfoss_air",
   "name": "Danfoss Air",
   "version": "2.0.0",
-  "codeowners": [],
+  "codeowners": ["@mbedk"],
   "config_flow": true,
   "documentation": "https://github.com/mbedk/danfoss_air",
+  "integration_type": "hub",
   "iot_class": "local_polling",
   "loggers": ["pydanfossair"],
   "requirements": ["pydanfossair==0.3.0"]

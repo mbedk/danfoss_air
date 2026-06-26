@@ -1,0 +1,27 @@
+{
+  "entity": {
+    "sensor": {
+      "exhaust_temperature": {"default": "mdi:thermometer"},
+      "outdoor_temperature": {"default": "mdi:thermometer"},
+      "supply_temperature": {"default": "mdi:thermometer"},
+      "extract_temperature": {"default": "mdi:thermometer"},
+      "remaining_filter": {"default": "mdi:air-filter"},
+      "humidity": {"default": "mdi:water-percent"},
+      "exhaust_fan_speed": {"default": "mdi:fan"},
+      "supply_fan_speed": {"default": "mdi:fan"},
+      "dial_battery": {"default": "mdi:battery"}
+    },
+    "binary_sensor": {
+      "bypass_active": {"default": "mdi:valve-open"},
+      "away_mode_active": {"default": "mdi:home-export-outline"}
+    },
+    "switch": {
+      "boost": {"default": "mdi:fan-plus"},
+      "bypass": {"default": "mdi:valve"},
+      "automatic_bypass": {"default": "mdi:valve-open"}
+    },
+    "number": {
+      "fan_step": {"default": "mdi:fan"}
+    }
+  }
+}

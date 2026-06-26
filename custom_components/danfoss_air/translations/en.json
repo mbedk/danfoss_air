@@ -6,6 +6,19 @@
         "description": "Enter the IP address or hostname of your Danfoss Air CCM unit.",
         "data": {
           "host": "Host"
+        },
+        "data_description": {
+          "host": "The IP address or hostname of your Danfoss Air CCM unit on the local network."
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Danfoss Air",
+        "description": "Update the connection settings for your Danfoss Air CCM unit.",
+        "data": {
+          "host": "Host"
+        },
+        "data_description": {
+          "host": "The IP address or hostname of your Danfoss Air CCM unit on the local network."
         }
       }
     },
@@ -13,7 +26,33 @@
       "cannot_connect": "Unable to connect to the Danfoss Air CCM unit. Check the IP address and that the unit is reachable."
     },
     "abort": {
-      "already_configured": "This Danfoss Air unit is already configured."
+      "already_configured": "This Danfoss Air unit is already configured.",
+      "reconfigure_successful": "Re-configuration was successful."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "exhaust_temperature": {"name": "Exhaust Temperature"},
+      "outdoor_temperature": {"name": "Outdoor Temperature"},
+      "supply_temperature": {"name": "Supply Temperature"},
+      "extract_temperature": {"name": "Extract Temperature"},
+      "remaining_filter": {"name": "Remaining Filter"},
+      "humidity": {"name": "Humidity"},
+      "exhaust_fan_speed": {"name": "Exhaust Fan Speed"},
+      "supply_fan_speed": {"name": "Supply Fan Speed"},
+      "dial_battery": {"name": "Dial Battery"}
+    },
+    "binary_sensor": {
+      "bypass_active": {"name": "Bypass Active"},
+      "away_mode_active": {"name": "Away Mode Active"}
+    },
+    "switch": {
+      "boost": {"name": "Boost"},
+      "bypass": {"name": "Bypass"},
+      "automatic_bypass": {"name": "Automatic Bypass"}
+    },
+    "number": {
+      "fan_step": {"name": "Fan Step"}
     }
   }
 }

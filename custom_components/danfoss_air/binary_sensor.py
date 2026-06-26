@@ -15,8 +15,8 @@ from .entity import DanfossAirEntity
 PARALLEL_UPDATES = 0
 
 _SENSORS = [
-    ("Bypass Active", ReadCommand.bypass, BinarySensorDeviceClass.OPENING),
-    ("Away Mode Active", ReadCommand.away_mode, None),
+    ("bypass_active", ReadCommand.bypass, BinarySensorDeviceClass.OPENING),
+    ("away_mode_active", ReadCommand.away_mode, None),
 ]
 
 
@@ -27,19 +27,19 @@ async def async_setup_entry(
 ) -> None:
     """Set up Danfoss Air binary sensors."""
     async_add_entities(
-        DanfossAirBinarySensor(entry.runtime_data, name, command, device_class)
-        for name, command, device_class in _SENSORS
+        DanfossAirBinarySensor(entry.runtime_data, translation_key, command, device_class)
+        for translation_key, command, device_class in _SENSORS
     )
 
 
 class DanfossAirBinarySensor(DanfossAirEntity, BinarySensorEntity):
     """Representation of a Danfoss Air binary sensor."""
 
-    def __init__(self, coordinator, name, command, device_class):
+    def __init__(self, coordinator, translation_key, command, device_class):
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._command = command
-        self._attr_name = name
+        self._attr_translation_key = translation_key
         self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{command.name}"
         self._attr_device_class = device_class
 
