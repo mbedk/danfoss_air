@@ -5,14 +5,15 @@ import logging
 from pydanfossair.commands import ReadCommand, UpdateCommand
 
 from homeassistant.components.number import NumberEntity, NumberMode
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from . import DanfossAirConfigEntry
+from .entity import DanfossAirEntity
 
 _LOGGER = logging.getLogger(__name__)
+
+PARALLEL_UPDATES = 1
 
 _FAN_STEP_COMMANDS = {
     1: UpdateCommand.set_fan_step_1,
@@ -30,36 +31,36 @@ _FAN_STEP_COMMANDS = {
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: DanfossAirConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Danfoss Air number entities from a config entry."""
-    data = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([DanfossAirFanStep(data)])
+    """Set up Danfoss Air number entities."""
+    async_add_entities([DanfossAirFanStep(entry.runtime_data)])
 
 
-class DanfossAirFanStep(NumberEntity):
+class DanfossAirFanStep(DanfossAirEntity, NumberEntity):
     """Representation of the Danfoss Air fan step control."""
 
-    _attr_has_entity_name = True
     _attr_name = "Fan Step"
     _attr_native_min_value = 1
     _attr_native_max_value = 10
     _attr_native_step = 1
     _attr_mode = NumberMode.SLIDER
 
-    def __init__(self, data) -> None:
+    def __init__(self, coordinator) -> None:
         """Initialize the fan step number entity."""
-        self._data = data
-        self._attr_unique_id = f"{data.host}_fan_step"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, data.host)},
-            name="Danfoss Air",
-            manufacturer="Danfoss",
-            model="Air CCM",
-        )
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_fan_step"
 
-    def set_native_value(self, value: float) -> None:
+    @property
+    def native_value(self) -> float | None:
+        """Return the current fan step (1–10)."""
+        raw = self.coordinator.data.get(ReadCommand.fan_step)
+        if raw is None:
+            return None
+        return raw / 10
+
+    async def async_set_native_value(self, value: float) -> None:
         """Set the fan step on the Danfoss Air unit."""
         step = int(value)
         command = _FAN_STEP_COMMANDS.get(step)
@@ -67,14 +68,7 @@ class DanfossAirFanStep(NumberEntity):
             _LOGGER.error("Invalid fan step value: %s", step)
             return
         _LOGGER.debug("Setting fan step to %s", step)
-        self._data.send_command(command)
-        self._attr_native_value = step
-
-    def update(self) -> None:
-        """Fetch the current fan step from the Danfoss Air unit."""
-        self._data.update()
-        raw = self._data.get_value(ReadCommand.fan_step)
-        if raw is None:
-            _LOGGER.debug("Could not get fan step data")
-        else:
-            self._attr_native_value = raw / 10
+        await self.coordinator.async_send_command(command)
+        self.coordinator.async_set_updated_data(
+            {**self.coordinator.data, ReadCommand.fan_step: step * 10}
+        )

@@ -1,4 +1,4 @@
-"""Support for the for Danfoss Air HRV sensors."""
+"""Support for Danfoss Air HRV sensors."""
 
 import logging
 
@@ -9,15 +9,16 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, REVOLUTIONS_PER_MINUTE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
+from . import DanfossAirConfigEntry
+from .entity import DanfossAirEntity
 
 _LOGGER = logging.getLogger(__name__)
+
+PARALLEL_UPDATES = 0
 
 _SENSORS = [
     (
@@ -62,7 +63,6 @@ _SENSORS = [
         SensorDeviceClass.HUMIDITY,
         SensorStateClass.MEASUREMENT,
     ),
-    ("Fan Step", PERCENTAGE, ReadCommand.fan_step, None, None),
     (
         "Exhaust Fan Speed",
         REVOLUTIONS_PER_MINUTE,
@@ -89,41 +89,30 @@ _SENSORS = [
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: DanfossAirConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Danfoss Air sensors from a config entry."""
-    data = hass.data[DOMAIN][entry.entry_id]
+    """Set up Danfoss Air sensors."""
     async_add_entities(
-        DanfossAirSensor(data, name, unit, command, device_class, state_class)
+        DanfossAirSensor(entry.runtime_data, name, unit, command, device_class, state_class)
         for name, unit, command, device_class, state_class in _SENSORS
     )
 
 
-class DanfossAirSensor(SensorEntity):
+class DanfossAirSensor(DanfossAirEntity, SensorEntity):
     """Representation of a Danfoss Air sensor."""
 
-    _attr_has_entity_name = True
-
-    def __init__(self, data, name, sensor_unit, sensor_type, device_class, state_class):
+    def __init__(self, coordinator, name, unit, command, device_class, state_class):
         """Initialize the sensor."""
-        self._data = data
-        self._type = sensor_type
+        super().__init__(coordinator)
+        self._command = command
         self._attr_name = name
-        self._attr_unique_id = f"{data.host}_{sensor_type.name}"
-        self._attr_native_unit_of_measurement = sensor_unit
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_{command.name}"
+        self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
         self._attr_state_class = state_class
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, data.host)},
-            name="Danfoss Air",
-            manufacturer="Danfoss",
-            model="Air CCM",
-        )
 
-    def update(self) -> None:
-        """Update the sensor state."""
-        self._data.update()
-        self._attr_native_value = self._data.get_value(self._type)
-        if self._attr_native_value is None:
-            _LOGGER.debug("Could not get data for %s", self._type)
+    @property
+    def native_value(self):
+        """Return the sensor value."""
+        return self.coordinator.data.get(self._command)
