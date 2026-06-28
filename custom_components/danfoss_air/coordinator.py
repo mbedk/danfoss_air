@@ -18,6 +18,14 @@ _LOGGER = logging.getLogger(__name__)
 
 UPDATE_INTERVAL = timedelta(seconds=60)
 
+# The CCM returns 0x8000 / 100 = -327.68 when the room sensor is not connected.
+_TEMP_SENTINEL = -200.0
+
+
+def _valid_temp(value: float) -> float | None:
+    """Return None for the 'sensor not connected' sentinel value."""
+    return None if value < _TEMP_SENTINEL else value
+
 
 class DanfossAirCoordinator(DataUpdateCoordinator[dict[ReadCommand, Any]]):
     """Coordinator for Danfoss Air CCM polling."""
@@ -61,8 +69,8 @@ class DanfossAirCoordinator(DataUpdateCoordinator[dict[ReadCommand, Any]]):
             ReadCommand.boost: c(ReadCommand.boost),
             ReadCommand.battery_percent: c(ReadCommand.battery_percent),
             ReadCommand.automatic_bypass: c(ReadCommand.automatic_bypass),
-            ReadCommand.roomTemperature: c(ReadCommand.roomTemperature),
-            ReadCommand.roomTemperatureCalculated: c(ReadCommand.roomTemperatureCalculated),
+            ReadCommand.roomTemperature: _valid_temp(c(ReadCommand.roomTemperature)),
+            ReadCommand.roomTemperatureCalculated: _valid_temp(c(ReadCommand.roomTemperatureCalculated)),
             ReadCommand.operation_mode: c(ReadCommand.operation_mode),
         }
 

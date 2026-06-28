@@ -1,5 +1,8 @@
 """Shared fixtures for Danfoss Air tests."""
 
+import importlib
+from pathlib import Path
+from contextlib import suppress
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -7,6 +10,9 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from homeassistant.const import CONF_HOST
 from pydanfossair.commands import ReadCommand
+
+# Absolute path to our custom_components directory.
+_OUR_CC_PATH = str(Path(__file__).parent.parent / "custom_components")
 
 MOCK_HOST = "192.168.1.100"
 
@@ -47,15 +53,28 @@ def auto_enable_custom_integrations(enable_custom_integrations):
 
 
 @pytest.fixture
-def mock_danfoss_client():
+def mock_danfoss_client(enable_custom_integrations):
     """Patch DanfossClient so no real network calls are made."""
-    with patch(
-        "custom_components.danfoss_air.coordinator.DanfossClient"
-    ) as mock_class:
+    # pytest-homeassistant-custom-component's testing_config has a regular
+    # custom_components package, so Python only sees that directory and not
+    # ours. We add our path to __path__ so our integration can be imported.
+    import custom_components
+
+    path_added = _OUR_CC_PATH not in list(custom_components.__path__)
+    if path_added:
+        custom_components.__path__.append(_OUR_CC_PATH)
+
+    coordinator = importlib.import_module("custom_components.danfoss_air.coordinator")
+
+    with patch.object(coordinator, "DanfossClient") as mock_class:
         client = MagicMock()
         client.command.side_effect = _command_side_effect
         mock_class.return_value = client
         yield client
+
+    if path_added:
+        with suppress(ValueError):
+            custom_components.__path__.remove(_OUR_CC_PATH)
 
 
 @pytest.fixture
