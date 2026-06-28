@@ -11,7 +11,7 @@ from .coordinator import DanfossAirCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = [Platform.BINARY_SENSOR, Platform.NUMBER, Platform.SENSOR, Platform.SWITCH]
+PLATFORMS = [Platform.BINARY_SENSOR, Platform.NUMBER, Platform.SELECT, Platform.SENSOR, Platform.SWITCH]
 
 type DanfossAirConfigEntry = ConfigEntry[DanfossAirCoordinator]
 

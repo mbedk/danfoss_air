@@ -103,6 +103,24 @@ _SENSORS = [
         EntityCategory.DIAGNOSTIC,
         False,
     ),
+    (
+        "room_temperature",
+        UnitOfTemperature.CELSIUS,
+        ReadCommand.roomTemperature,
+        SensorDeviceClass.TEMPERATURE,
+        SensorStateClass.MEASUREMENT,
+        None,
+        True,
+    ),
+    (
+        "room_temperature_calculated",
+        UnitOfTemperature.CELSIUS,
+        ReadCommand.roomTemperatureCalculated,
+        SensorDeviceClass.TEMPERATURE,
+        SensorStateClass.MEASUREMENT,
+        None,
+        True,
+    ),
 ]
 
 

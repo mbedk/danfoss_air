@@ -63,6 +63,25 @@ async def test_bypass_turn_on(hass, setup_integration, mock_danfoss_client):
     assert hass.states.get(entity_id).state == "on"
 
 
+async def test_automatic_bypass_uses_correct_commands(hass, setup_integration, mock_danfoss_client):
+    """Automatic bypass uses its own commands, not the manual bypass commands."""
+    entry = setup_integration
+    entity_id = _entity_id(hass, entry, "automatic_bypass")
+
+    await hass.services.async_call(
+        "switch", "turn_on", {"entity_id": entity_id}, blocking=True
+    )
+    await hass.async_block_till_done()
+    mock_danfoss_client.command.assert_any_call(UpdateCommand.automatic_bypass_activate)
+
+    mock_danfoss_client.command.reset_mock()
+    await hass.services.async_call(
+        "switch", "turn_off", {"entity_id": entity_id}, blocking=True
+    )
+    await hass.async_block_till_done()
+    mock_danfoss_client.command.assert_any_call(UpdateCommand.automatic_bypass_deactivate)
+
+
 async def test_switches_unavailable_on_error(hass, setup_integration, mock_danfoss_client):
     """Switches go unavailable when the coordinator fails."""
     entry = setup_integration

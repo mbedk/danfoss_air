@@ -32,8 +32,8 @@ _SWITCHES = [
     (
         "automatic_bypass",
         ReadCommand.automatic_bypass,
-        UpdateCommand.bypass_activate,
-        UpdateCommand.bypass_deactivate,
+        UpdateCommand.automatic_bypass_activate,
+        UpdateCommand.automatic_bypass_deactivate,
     ),
 ]
 

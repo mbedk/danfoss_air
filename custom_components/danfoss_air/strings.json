@@ -40,7 +40,9 @@
       "humidity": {"name": "Humidity"},
       "exhaust_fan_speed": {"name": "Exhaust Fan Speed"},
       "supply_fan_speed": {"name": "Supply Fan Speed"},
-      "dial_battery": {"name": "Dial Battery"}
+      "dial_battery": {"name": "Dial Battery"},
+      "room_temperature": {"name": "Room Temperature"},
+      "room_temperature_calculated": {"name": "Room Temperature (Calculated)"}
     },
     "binary_sensor": {
       "bypass_active": {"name": "Bypass Active"},
@@ -53,6 +55,16 @@
     },
     "number": {
       "fan_step": {"name": "Fan Step"}
+    },
+    "select": {
+      "operation_mode": {
+        "name": "Operation Mode",
+        "state": {
+          "demand": "Demand",
+          "program": "Program",
+          "manual": "Manual"
+        }
+      }
     }
   }
 }

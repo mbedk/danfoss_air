@@ -36,6 +36,18 @@ async def test_temperature_sensors(hass, setup_integration):
         assert float(state.state) == pytest.approx(expected)
 
 
+async def test_room_temperature_sensors(hass, setup_integration):
+    """Room temperature sensors report values from the coordinator."""
+    entry = setup_integration
+    for command_name, expected in [
+        ("roomTemperature", 20.5),
+        ("roomTemperatureCalculated", 21.0),
+    ]:
+        entity_id = _entity_id(hass, entry, "sensor", command_name)
+        assert entity_id is not None, f"Entity for {command_name} not found"
+        assert float(hass.states.get(entity_id).state) == pytest.approx(expected)
+
+
 async def test_humidity_and_filter_sensors(hass, setup_integration):
     """Humidity and filter sensors report rounded values."""
     entry = setup_integration

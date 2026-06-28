@@ -61,6 +61,9 @@ class DanfossAirCoordinator(DataUpdateCoordinator[dict[ReadCommand, Any]]):
             ReadCommand.boost: c(ReadCommand.boost),
             ReadCommand.battery_percent: c(ReadCommand.battery_percent),
             ReadCommand.automatic_bypass: c(ReadCommand.automatic_bypass),
+            ReadCommand.roomTemperature: c(ReadCommand.roomTemperature),
+            ReadCommand.roomTemperatureCalculated: c(ReadCommand.roomTemperatureCalculated),
+            ReadCommand.operation_mode: c(ReadCommand.operation_mode),
         }
 
     async def async_send_command(self, command) -> Any:
