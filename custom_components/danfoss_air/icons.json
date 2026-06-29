@@ -7,6 +7,7 @@
       "extract_temperature": {"default": "mdi:thermometer"},
       "remaining_filter": {"default": "mdi:air-filter"},
       "humidity": {"default": "mdi:water-percent"},
+      "fan_step": {"default": "mdi:fan"},
       "exhaust_fan_speed": {"default": "mdi:fan"},
       "supply_fan_speed": {"default": "mdi:fan"},
       "dial_battery": {"default": "mdi:battery"}

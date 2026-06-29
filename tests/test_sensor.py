@@ -2,6 +2,7 @@
 
 import pytest
 from homeassistant.helpers import entity_registry as er
+from pydanfossair.commands import ReadCommand
 
 from .conftest import MOCK_HOST
 
@@ -69,6 +70,35 @@ async def test_sensors_become_unavailable_on_error(hass, setup_integration, mock
     await hass.async_block_till_done()
 
     assert hass.states.get(entity_id).state == "unavailable"
+
+
+async def test_fan_step_sensor(hass, setup_integration):
+    """Fan step sensor shows the current step (1–10) from the coordinator."""
+    entry = setup_integration
+    ent_reg = er.async_get(hass)
+    entity_id = ent_reg.async_get_entity_id("sensor", "danfoss_air", f"{entry.entry_id}_fan_step")
+    assert entity_id is not None
+    state = hass.states.get(entity_id)
+    assert state is not None
+    assert int(state.state) == 6  # MOCK_DATA fan_step=60 → 60//10 = 6
+
+
+async def test_fan_step_sensor_updates_in_demand_mode(hass, setup_integration, mock_danfoss_client):
+    """Fan step sensor reflects the CCM's actual step even in demand mode."""
+    from .conftest import MOCK_DATA
+    entry = setup_integration
+    ent_reg = er.async_get(hass)
+    entity_id = ent_reg.async_get_entity_id("sensor", "danfoss_air", f"{entry.entry_id}_fan_step")
+
+    mock_danfoss_client.command.side_effect = lambda cmd: (
+        "demand" if cmd == ReadCommand.operation_mode
+        else 30 if cmd == ReadCommand.fan_step  # step 3
+        else MOCK_DATA.get(cmd)
+    )
+    await entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+
+    assert int(hass.states.get(entity_id).state) == 3
 
 
 async def test_sensors_recover_after_error(hass, setup_integration, mock_danfoss_client):

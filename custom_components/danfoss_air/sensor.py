@@ -112,10 +112,29 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Danfoss Air sensors."""
-    async_add_entities(
-        DanfossAirSensor(entry.runtime_data, *sensor)
-        for sensor in _SENSORS
-    )
+    entities: list = [
+        DanfossAirSensor(entry.runtime_data, *sensor) for sensor in _SENSORS
+    ]
+    entities.append(DanfossAirFanStepSensor(entry.runtime_data))
+    async_add_entities(entities)
+
+
+class DanfossAirFanStepSensor(DanfossAirEntity, SensorEntity):
+    """Read-only sensor showing the current fan step (1–10) as reported by the CCM."""
+
+    _attr_translation_key = "fan_step"
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, coordinator) -> None:
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_fan_step"
+
+    @property
+    def native_value(self) -> int | None:
+        raw = self.coordinator.data.get(ReadCommand.fan_step)
+        if raw is None:
+            return None
+        return raw // 10
 
 
 class DanfossAirSensor(DanfossAirEntity, SensorEntity):

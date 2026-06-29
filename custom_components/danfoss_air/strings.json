@@ -38,6 +38,7 @@
       "extract_temperature": {"name": "Extract Temperature"},
       "remaining_filter": {"name": "Remaining Filter"},
       "humidity": {"name": "Humidity"},
+      "fan_step": {"name": "Fan Step"},
       "exhaust_fan_speed": {"name": "Exhaust Fan Speed"},
       "supply_fan_speed": {"name": "Supply Fan Speed"},
       "dial_battery": {"name": "Dial Battery"}

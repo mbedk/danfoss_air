@@ -50,7 +50,14 @@ class DanfossAirFanStep(DanfossAirEntity, NumberEntity):
     def __init__(self, coordinator) -> None:
         """Initialize the fan step number entity."""
         super().__init__(coordinator)
-        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_fan_step"
+        self._attr_unique_id = f"{coordinator.config_entry.entry_id}_fan_step_control"
+
+    @property
+    def available(self) -> bool:
+        """Only available in manual mode — CCM owns fan step in demand/program."""
+        if not super().available:
+            return False
+        return self.coordinator.data.get(ReadCommand.operation_mode) == "manual"
 
     @property
     def native_value(self) -> float | None:
@@ -61,17 +68,13 @@ class DanfossAirFanStep(DanfossAirEntity, NumberEntity):
         return raw / 10
 
     async def async_set_native_value(self, value: float) -> None:
-        """Set the fan step; switches to manual mode if the CCM is in demand/program."""
+        """Set the fan step on the Danfoss Air unit."""
         step = int(value)
         command = _FAN_STEP_COMMANDS.get(step)
         if command is None:
             _LOGGER.error("Invalid fan step value: %s", step)
             return
-        if self.coordinator.data.get(ReadCommand.operation_mode) != "manual":
-            await self.coordinator.async_send_command(UpdateCommand.operation_mode_manual)
         await self.coordinator.async_send_command(command)
-        self.coordinator.async_set_updated_data({
-            **self.coordinator.data,
-            ReadCommand.fan_step: step * 10,
-            ReadCommand.operation_mode: "manual",
-        })
+        self.coordinator.async_set_updated_data(
+            {**self.coordinator.data, ReadCommand.fan_step: step * 10}
+        )
