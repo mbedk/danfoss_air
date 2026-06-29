@@ -31,8 +31,6 @@ MOCK_DATA = {
     ReadCommand.boost: False,
     ReadCommand.battery_percent: 85.0,
     ReadCommand.automatic_bypass: False,
-    ReadCommand.roomTemperature: 20.5,
-    ReadCommand.roomTemperatureCalculated: 21.0,
     ReadCommand.operation_mode: "manual",
 }
 

@@ -9,9 +9,7 @@
       "humidity": {"default": "mdi:water-percent"},
       "exhaust_fan_speed": {"default": "mdi:fan"},
       "supply_fan_speed": {"default": "mdi:fan"},
-      "dial_battery": {"default": "mdi:battery"},
-      "room_temperature": {"default": "mdi:thermometer"},
-      "room_temperature_calculated": {"default": "mdi:thermometer"}
+      "dial_battery": {"default": "mdi:battery"}
     },
     "binary_sensor": {
       "bypass_active": {"default": "mdi:valve-open"},

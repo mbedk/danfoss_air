@@ -1,11 +1,7 @@
 """Tests for Danfoss Air sensors."""
 
-from unittest.mock import patch
-
 import pytest
 from homeassistant.helpers import entity_registry as er
-
-from pydanfossair.commands import ReadCommand
 
 from .conftest import MOCK_HOST
 
@@ -34,36 +30,6 @@ async def test_temperature_sensors(hass, setup_integration):
         state = hass.states.get(entity_id)
         assert state is not None
         assert float(state.state) == pytest.approx(expected)
-
-
-async def test_room_temperature_sensors(hass, setup_integration):
-    """Room temperature sensors report values from the coordinator."""
-    entry = setup_integration
-    for command_name, expected in [
-        ("roomTemperature", 20.5),
-        ("roomTemperatureCalculated", 21.0),
-    ]:
-        entity_id = _entity_id(hass, entry, "sensor", command_name)
-        assert entity_id is not None, f"Entity for {command_name} not found"
-        assert float(hass.states.get(entity_id).state) == pytest.approx(expected)
-
-
-async def test_room_temperature_unavailable_when_sensor_disconnected(hass, setup_integration, mock_danfoss_client):
-    """Room temperature shows unavailable when the CCM returns the 0x8000 sentinel (-327.68°C)."""
-    entry = setup_integration
-    from .conftest import MOCK_DATA, _command_side_effect
-
-    sentinel_data = {**MOCK_DATA, ReadCommand.roomTemperature: -327.68, ReadCommand.roomTemperatureCalculated: -327.68}
-    mock_danfoss_client.command.side_effect = lambda cmd: sentinel_data.get(cmd) if cmd in sentinel_data else _command_side_effect(cmd)
-
-    await entry.runtime_data.async_refresh()
-    await hass.async_block_till_done()
-
-    for command_name in ("roomTemperature", "roomTemperatureCalculated"):
-        entity_id = _entity_id(hass, entry, "sensor", command_name)
-        # "unknown" = device responded but sensor is not connected (native_value None,
-        # coordinator still healthy). "unavailable" would mean the device is unreachable.
-        assert hass.states.get(entity_id).state == "unknown"
 
 
 async def test_humidity_and_filter_sensors(hass, setup_integration):
