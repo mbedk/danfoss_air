@@ -44,8 +44,9 @@ class DanfossAirOperationMode(DanfossAirEntity, SelectEntity):
         return self.coordinator.data.get(ReadCommand.operation_mode)
 
     async def async_select_option(self, option: str) -> None:
-        """Change the operation mode."""
+        """Change the operation mode and refresh so fan_step reflects the actual CCM state."""
         await self.coordinator.async_send_command(_OPERATION_MODE_COMMANDS[option])
         self.coordinator.async_set_updated_data(
             {**self.coordinator.data, ReadCommand.operation_mode: option}
         )
+        await self.coordinator.async_request_refresh()

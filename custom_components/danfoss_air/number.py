@@ -61,14 +61,17 @@ class DanfossAirFanStep(DanfossAirEntity, NumberEntity):
         return raw / 10
 
     async def async_set_native_value(self, value: float) -> None:
-        """Set the fan step on the Danfoss Air unit."""
+        """Set the fan step; switches to manual mode if the CCM is in demand/program."""
         step = int(value)
         command = _FAN_STEP_COMMANDS.get(step)
         if command is None:
             _LOGGER.error("Invalid fan step value: %s", step)
             return
-        _LOGGER.debug("Setting fan step to %s", step)
+        if self.coordinator.data.get(ReadCommand.operation_mode) != "manual":
+            await self.coordinator.async_send_command(UpdateCommand.operation_mode_manual)
         await self.coordinator.async_send_command(command)
-        self.coordinator.async_set_updated_data(
-            {**self.coordinator.data, ReadCommand.fan_step: step * 10}
-        )
+        self.coordinator.async_set_updated_data({
+            **self.coordinator.data,
+            ReadCommand.fan_step: step * 10,
+            ReadCommand.operation_mode: "manual",
+        })

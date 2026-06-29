@@ -30,9 +30,14 @@ async def test_operation_mode_options(hass, setup_integration):
 
 
 async def test_select_demand(hass, setup_integration, mock_danfoss_client):
-    """Selecting demand sends operation_mode_demand and updates state optimistically."""
+    """Selecting demand sends operation_mode_demand; refresh returns the new mode from CCM."""
+    from .conftest import MOCK_DATA
     entry = setup_integration
     entity_id = _entity_id(hass, entry)
+
+    mock_danfoss_client.command.side_effect = lambda cmd: (
+        "demand" if cmd == ReadCommand.operation_mode else MOCK_DATA.get(cmd)
+    )
 
     await hass.services.async_call(
         "select", "select_option", {"entity_id": entity_id, "option": "demand"}, blocking=True
@@ -44,9 +49,14 @@ async def test_select_demand(hass, setup_integration, mock_danfoss_client):
 
 
 async def test_select_program(hass, setup_integration, mock_danfoss_client):
-    """Selecting program sends operation_mode_program and updates state optimistically."""
+    """Selecting program sends operation_mode_program; refresh returns the new mode from CCM."""
+    from .conftest import MOCK_DATA
     entry = setup_integration
     entity_id = _entity_id(hass, entry)
+
+    mock_danfoss_client.command.side_effect = lambda cmd: (
+        "program" if cmd == ReadCommand.operation_mode else MOCK_DATA.get(cmd)
+    )
 
     await hass.services.async_call(
         "select", "select_option", {"entity_id": entity_id, "option": "program"}, blocking=True

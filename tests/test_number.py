@@ -80,3 +80,28 @@ async def test_fan_step_unavailable_on_error(hass, setup_integration, mock_danfo
     await hass.async_block_till_done()
 
     assert hass.states.get(entity_id).state == "unavailable"
+
+
+async def test_fan_step_switches_to_manual_when_in_demand_mode(hass, setup_integration, mock_danfoss_client):
+    """Moving the slider in demand mode sends manual command first, then the step command."""
+    from .conftest import MOCK_DATA
+    entry = setup_integration
+    entity_id = _entity_id(hass, entry)
+
+    mock_danfoss_client.command.side_effect = lambda cmd: (
+        "demand" if cmd == ReadCommand.operation_mode else MOCK_DATA.get(cmd)
+    )
+    await entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+
+    mock_danfoss_client.command.reset_mock()
+    await hass.services.async_call(
+        "number", "set_value", {"entity_id": entity_id, "value": 5}, blocking=True
+    )
+    await hass.async_block_till_done()
+
+    calls = [c.args[0] for c in mock_danfoss_client.command.call_args_list]
+    assert UpdateCommand.operation_mode_manual in calls
+    assert UpdateCommand.set_fan_step_5 in calls
+    assert calls.index(UpdateCommand.operation_mode_manual) < calls.index(UpdateCommand.set_fan_step_5)
+    assert float(hass.states.get(entity_id).state) == pytest.approx(5.0)
