@@ -35,7 +35,13 @@ async def async_setup_entry(
 class DanfossAirBinarySensor(DanfossAirEntity, BinarySensorEntity):
     """Representation of a Danfoss Air binary sensor."""
 
-    def __init__(self, coordinator, translation_key, command, device_class):
+    def __init__(
+        self,
+        coordinator,
+        translation_key: str,
+        command: ReadCommand,
+        device_class: BinarySensorDeviceClass | None,
+    ) -> None:
         """Initialize the binary sensor."""
         super().__init__(coordinator)
         self._command = command
@@ -44,6 +50,6 @@ class DanfossAirBinarySensor(DanfossAirEntity, BinarySensorEntity):
         self._attr_device_class = device_class
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool | None:
         """Return the binary sensor state."""
         return self.coordinator.data.get(self._command)

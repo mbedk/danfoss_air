@@ -63,7 +63,7 @@ _SENSORS = [
         PERCENTAGE,
         ReadCommand.filterPercent,
         None,
-        None,
+        SensorStateClass.MEASUREMENT,
         None,
         True,
     ),
@@ -112,7 +112,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Danfoss Air sensors."""
-    entities: list = [
+    entities: list[SensorEntity] = [
         DanfossAirSensor(entry.runtime_data, *sensor) for sensor in _SENSORS
     ]
     entities.append(DanfossAirFanStepSensor(entry.runtime_data))
@@ -143,14 +143,14 @@ class DanfossAirSensor(DanfossAirEntity, SensorEntity):
     def __init__(
         self,
         coordinator,
-        translation_key,
-        unit,
-        command,
-        device_class,
-        state_class,
-        entity_category,
-        enabled_by_default,
-    ):
+        translation_key: str,
+        unit: str | None,
+        command: ReadCommand,
+        device_class: SensorDeviceClass | None,
+        state_class: SensorStateClass | None,
+        entity_category: EntityCategory | None,
+        enabled_by_default: bool,
+    ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._command = command
@@ -163,6 +163,6 @@ class DanfossAirSensor(DanfossAirEntity, SensorEntity):
         self._attr_entity_registry_enabled_default = enabled_by_default
 
     @property
-    def native_value(self):
+    def native_value(self) -> float | None:
         """Return the sensor value."""
         return self.coordinator.data.get(self._command)

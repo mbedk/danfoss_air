@@ -64,7 +64,11 @@ async def test_bypass_turn_on(hass, setup_integration, mock_danfoss_client):
 
 
 async def test_automatic_bypass_uses_correct_commands(hass, setup_integration, mock_danfoss_client):
-    """Automatic bypass uses its own commands, not the manual bypass commands."""
+    """Automatic bypass uses its own commands and shows the intended state.
+
+    The CCM stores automatic_bypass as an inverted bit, so the optimistic
+    state must reflect the user's intent, not pydanfossair's raw write return.
+    """
     entry = setup_integration
     entity_id = _entity_id(hass, entry, "automatic_bypass")
 
@@ -73,6 +77,7 @@ async def test_automatic_bypass_uses_correct_commands(hass, setup_integration, m
     )
     await hass.async_block_till_done()
     mock_danfoss_client.command.assert_any_call(UpdateCommand.automatic_bypass_activate)
+    assert hass.states.get(entity_id).state == "on"
 
     mock_danfoss_client.command.reset_mock()
     await hass.services.async_call(
@@ -80,6 +85,7 @@ async def test_automatic_bypass_uses_correct_commands(hass, setup_integration, m
     )
     await hass.async_block_till_done()
     mock_danfoss_client.command.assert_any_call(UpdateCommand.automatic_bypass_deactivate)
+    assert hass.states.get(entity_id).state == "off"
 
 
 async def test_switches_unavailable_on_error(hass, setup_integration, mock_danfoss_client):

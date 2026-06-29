@@ -53,7 +53,14 @@ async def async_setup_entry(
 class DanfossAirSwitch(DanfossAirEntity, SwitchEntity):
     """Representation of a Danfoss Air switch."""
 
-    def __init__(self, coordinator, translation_key, state_command, on_command, off_command):
+    def __init__(
+        self,
+        coordinator,
+        translation_key: str,
+        state_command: ReadCommand,
+        on_command: UpdateCommand,
+        off_command: UpdateCommand,
+    ) -> None:
         """Initialize the switch."""
         super().__init__(coordinator)
         self._state_command = state_command
@@ -69,16 +76,22 @@ class DanfossAirSwitch(DanfossAirEntity, SwitchEntity):
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
-        _LOGGER.debug("Turning on %s", self._attr_translation_key)
-        result = await self.coordinator.async_send_command(self._on_command)
-        self.coordinator.async_set_updated_data(
-            {**self.coordinator.data, self._state_command: result}
-        )
+        await self._async_set(self._on_command, True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Turn the switch off."""
-        _LOGGER.debug("Turning off %s", self._attr_translation_key)
-        result = await self.coordinator.async_send_command(self._off_command)
+        await self._async_set(self._off_command, False)
+
+    async def _async_set(self, command: UpdateCommand, state: bool) -> None:
+        """Send a command and optimistically apply the intended state.
+
+        We use the intended boolean rather than the value returned by the
+        command: pydanfossair's write path reports the raw register bit, but
+        automatic_bypass stores an inverted bit, so trusting the return value
+        would show the switch in the wrong state until the next poll.
+        """
+        _LOGGER.debug("Setting %s to %s", self._attr_translation_key, state)
+        await self.coordinator.async_send_command(command)
         self.coordinator.async_set_updated_data(
-            {**self.coordinator.data, self._state_command: result}
+            {**self.coordinator.data, self._state_command: state}
         )
